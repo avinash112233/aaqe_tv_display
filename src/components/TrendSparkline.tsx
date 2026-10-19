@@ -7,13 +7,16 @@ interface Props {
   points: StationHistoryPoint[];
 }
 
-const PAD = { l: 44, r: 40, t: 22, b: 34 };
+const PAD = { l: 48, r: 40, t: 22, b: 40 };
 
 function yTicks(min: number, max: number): number[] {
   const lo = Math.max(0, Math.floor(min / 50) * 50);
   const hi = Math.max(lo + 50, Math.ceil(max / 50) * 50);
+  let step = 50;
+  // Narrow AQI bands (e.g. 85–96) used to show only 50 & 100 — halve step until ≥3 ticks.
+  while (step > 10 && (hi - lo) / step < 2) step /= 2;
   const ticks: number[] = [];
-  for (let v = lo; v <= hi; v += 50) ticks.push(v);
+  for (let v = lo; v <= hi; v += step) ticks.push(v);
   return ticks;
 }
 
@@ -146,11 +149,11 @@ export default function TrendSparkline({ points }: Props) {
       <line x1={axisLeft} y1={axisTop} x2={axisLeft} y2={axisBot} className="dash-trend-grid" />
 
       <text
-        x={14}
+        x={9}
         y={(axisTop + axisBot) / 2}
         className="dash-trend-axis-title"
         textAnchor="middle"
-        transform={`rotate(-90 14 ${(axisTop + axisBot) / 2})`}
+        transform={`rotate(-90 9 ${(axisTop + axisBot) / 2})`}
       >
         AQI
       </text>
@@ -158,7 +161,7 @@ export default function TrendSparkline({ points }: Props) {
       {ticks.map((t) => (
         <text
           key={`y-${t}`}
-          x={axisLeft - 7}
+          x={axisLeft - 11}
           y={yAt(t)}
           className="dash-trend-axis-label"
           textAnchor="end"
@@ -175,7 +178,7 @@ export default function TrendSparkline({ points }: Props) {
           <text
             key={`x-${p.date}`}
             x={xAt(i)}
-            y={axisBot + 14}
+            y={axisBot + 18}
             className="dash-trend-axis-label"
             textAnchor={first ? 'start' : last ? 'end' : 'middle'}
           >
@@ -184,7 +187,7 @@ export default function TrendSparkline({ points }: Props) {
         );
       })}
 
-      <text x={(axisLeft + axisRight) / 2} y={H - 6} className="dash-trend-axis-title" textAnchor="middle">
+      <text x={(axisLeft + axisRight) / 2} y={H - 3} className="dash-trend-axis-title" textAnchor="middle">
         Date
       </text>
 
@@ -195,7 +198,7 @@ export default function TrendSparkline({ points }: Props) {
           d={line}
           stroke={`url(#${gradId})`}
           fill="none"
-          strokeWidth={3}
+          strokeWidth={6}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -206,7 +209,7 @@ export default function TrendSparkline({ points }: Props) {
         const last = i === coords.length - 1;
         return (
           <g key={`pt-${c.date}`}>
-            <circle cx={c.x} cy={c.y} r={4} fill={c.color} />
+            <circle cx={c.x} cy={c.y} r={5.5} fill={c.color} />
             <text
               x={first ? c.x + 6 : last ? c.x - 6 : c.x}
               y={c.y - 9}

@@ -28,7 +28,7 @@ export const AQI_CATEGORIES: AqiCategory[] = [
     color: '#ffff00',
     textColor: '#111827',
     message:
-      'Air quality is acceptable. Unusually sensitive individuals should consider limiting prolonged outdoor exertion.',
+      'Air quality is acceptable. Unusually sensitive individuals\nshould consider limiting prolonged outdoor exertion.',
   },
   {
     min: 101,
@@ -81,6 +81,12 @@ const NO_DATA_CATEGORY: AqiCategory = {
   message: 'No forecast data is available for this station right now.',
   noData: true,
 };
+
+/** Display PM₂.₅ rounded up to a whole µg/m³ (consistent across dial, cities, etc.). */
+export function formatPm25(pm25: number | null | undefined): string {
+  if (pm25 == null || !Number.isFinite(pm25)) return '—';
+  return String(Math.ceil(pm25));
+}
 
 export function getAqiCategory(aqi: number | null | undefined): AqiCategory {
   if (aqi == null || !Number.isFinite(aqi)) return NO_DATA_CATEGORY;

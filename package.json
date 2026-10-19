@@ -9,7 +9,8 @@
     "dev:bg": "sh scripts/dev-start.sh",
     "dev:stop": "sh scripts/dev-stop.sh",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npx vercel --prod"
   },
   "dependencies": {
     "dayjs": "^1.11.19",

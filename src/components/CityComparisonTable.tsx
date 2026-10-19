@@ -1,5 +1,5 @@
 import type { NearbyCityAqi } from '../api/forecast';
-import { getAqiCategory } from '../utils/aqi';
+import { formatPm25, getAqiCategory } from '../utils/aqi';
 
 interface Props {
   cities: NearbyCityAqi[];
@@ -26,7 +26,7 @@ export default function CityComparisonTable({ cities }: Props) {
                 <div className="dash-city-pm">
                   <span className="dash-city-pm-label">PM₂.₅</span>
                   <span className="dash-city-pm-value">
-                    {c.pm25 != null ? c.pm25.toFixed(1) : '—'}
+                    {formatPm25(c.pm25)}
                   </span>
                 </div>
               </div>
@@ -36,8 +36,8 @@ export default function CityComparisonTable({ cities }: Props) {
       )}
       <p className="dash-cities-source">
         Source: PM2.5 forecasts are generated using NASA&apos;s GEOS-FP and machine
-        learning model supported by NASA&apos;s SNWG and HAQAST programs. For more
-        details contact (pawan.gupta@nasa.gov).
+        learning model supported by NASA&apos;s SNWG and HAQAST programs, and converted
+        to AQI using US EPA guidelines. For more details contact (pawan.gupta@nasa.gov).
       </p>
     </section>
   );

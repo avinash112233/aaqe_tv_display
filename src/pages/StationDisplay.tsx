@@ -120,8 +120,9 @@ export default function StationDisplay() {
         {data && hero && (
           <>
             <section className="dash-panel dash-dial">
-              <div className="dash-panel-header">
+              <div className="dash-panel-header dash-dial-header">
                 <span className="dash-panel-title">Current Forecast</span>
+                <p className="dash-dial-units-note">All PM₂.₅ values are in µg/m³.</p>
               </div>
               <div className="aqi-dial-wrap">
                 <AqiGaugeDial value={hero.aqi} pm25={hero.pm25} />

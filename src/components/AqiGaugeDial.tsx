@@ -1,4 +1,4 @@
-import { AQI_CATEGORIES, getAqiCategory } from '../utils/aqi';
+import { AQI_CATEGORIES, formatPm25, getAqiCategory } from '../utils/aqi';
 import {
   AQI_BREAKPOINTS,
   describeArc,
@@ -36,7 +36,7 @@ export default function AqiGaugeDial({ value, pm25 = null }: Props) {
   const clampedValue = hasValue ? Math.min(value as number, AQI_BREAKPOINTS[AQI_BREAKPOINTS.length - 1]) : null;
   const needleEnd = clampedValue != null ? tickPoint(CX, CY, NEEDLE_R, clampedValue) : null;
   const aqiText = hasValue ? String(Math.round(value as number)) : '—';
-  const pmText = pm25 != null && Number.isFinite(pm25) ? pm25.toFixed(1) : '—';
+  const pmText = formatPm25(pm25);
 
   return (
     <svg

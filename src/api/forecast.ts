@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { fetchAeronetUrl } from './aeronetFetch';
 
 const PROXY_BASE = '/api/aeronet/data_push/AQI/output_AAQE_geoJSON/';
 const DIRECT_BASE = 'https://aeronet.gsfc.nasa.gov/data_push/AQI/output_AAQE_geoJSON/';
@@ -57,16 +58,20 @@ function toYmdCompact(date: string): string {
   return date.replaceAll('-', '');
 }
 
-async function probeInitDate(dateIso: string): Promise<string | null> {
+type ProbeInitResult = { kind: 'hit'; date: string } | { kind: 'missing' } | { kind: 'unreachable' };
+
+async function probeInitDate(dateIso: string): Promise<ProbeInitResult> {
   const url = `${getForecastBaseUrl()}${toYmdCompact(dateIso)}_forecast.geojson`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
+    const res = await fetchAeronetUrl(url, { signal: ctrl.signal });
     res.body?.cancel().catch(() => {});
-    return res.ok ? dateIso : null;
+    if (res.ok) return { kind: 'hit', date: dateIso };
+    if (res.status >= 500) return { kind: 'unreachable' };
+    return { kind: 'missing' };
   } catch {
-    return null;
+    return { kind: 'unreachable' };
   } finally {
     clearTimeout(timer);
   }
@@ -76,11 +81,19 @@ export async function findNearestInitDate(startIso: string): Promise<string | nu
   let d = dayjs(startIso, 'YYYY-MM-DD', true);
   if (!d.isValid()) return null;
 
+  let sawUnreachable = false;
   for (let i = 0; i < 8; i++) {
     const iso = d.format('YYYY-MM-DD');
-    const found = await probeInitDate(iso);
-    if (found) return found;
+    const probe = await probeInitDate(iso);
+    if (probe.kind === 'hit') return probe.date;
+    if (probe.kind === 'unreachable') sawUnreachable = true;
     d = d.subtract(1, 'day');
+  }
+  if (sawUnreachable) {
+    throw new Error(
+      'Cannot reach the NASA AERONET forecast server (connection failed). ' +
+        'Open https://aeronet.gsfc.nasa.gov in your browser or try GSFC VPN, then reload.'
+    );
   }
   return null;
 }
@@ -99,7 +112,7 @@ export async function fetchForecastByInitDate(initIso: string): Promise<Forecast
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
     try {
-      const res = await fetch(url, { signal: ctrl.signal });
+      const res = await fetchAeronetUrl(url, { signal: ctrl.signal });
       if (!res.ok) {
         missingForecastDates.add(initIso);
         throw new Error(`Forecast unavailable for ${initIso} (${res.status})`);

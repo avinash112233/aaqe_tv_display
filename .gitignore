@@ -6,3 +6,5 @@ dist
 .env.*
 .dev.pid
 .dev.log
+dev-data
+.vercel

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { getAqiCategory } from '../utils/aqi';
+import { fetchAeronetUrl } from './aeronetFetch';
 
 /**
  * Sujan/Jun's Africa-wide pollutant grid feed (same host/pattern as the main AAQE
@@ -32,7 +33,10 @@ async function probeGridInitDate(dateIso: string): Promise<string | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const res = await fetch(gridUrlForDate(dateIso), { method: 'HEAD', signal: ctrl.signal });
+    const res = await fetchAeronetUrl(gridUrlForDate(dateIso), {
+      method: 'HEAD',
+      signal: ctrl.signal,
+    });
     return res.ok ? dateIso : null;
   } catch {
     return null;
@@ -92,7 +96,7 @@ export async function loadPollutantGridOverlay(startIso?: string): Promise<Pollu
   const initDate = await findNearestGridInitDate(today);
   if (!initDate) throw new Error('No recent pollutant grid file found.');
 
-  const res = await fetch(gridUrlForDate(initDate));
+  const res = await fetchAeronetUrl(gridUrlForDate(initDate));
   if (!res.ok) throw new Error(`Pollutant grid unavailable for ${initDate} (${res.status})`);
 
   const data = (await res.json()) as {

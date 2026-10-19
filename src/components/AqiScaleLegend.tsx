@@ -8,11 +8,26 @@ export default function AqiScaleLegend() {
 
   return (
     <div className="dash-scale-legend">
-      {AQI_CATEGORIES.map((c) => (
-        <div key={c.label} className="dash-scale-legend-cell" style={{ background: c.color, color: c.textColor }}>
-          {c.shortLabel}
-        </div>
-      ))}
+      {AQI_CATEGORIES.map((c) => {
+        const isUsg = c.shortLabel === 'USG';
+        return (
+          <div
+            key={c.label}
+            className={`dash-scale-legend-cell${isUsg ? ' dash-scale-legend-cell-usg' : ''}`}
+            style={{ background: c.color, color: c.textColor }}
+          >
+            {isUsg ? (
+              <>
+                Unhealthy for
+                <br />
+                Sensitive Groups
+              </>
+            ) : (
+              c.shortLabel
+            )}
+          </div>
+        );
+      })}
       {AQI_CATEGORIES.map((c, i) => (
         <div key={c.label} className="dash-scale-legend-cell dash-scale-legend-range">
           {isLast(i) ? `${c.min}+` : `${c.min}-${c.max}`}
